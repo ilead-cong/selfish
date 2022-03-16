@@ -10,7 +10,11 @@ import numpy as np
 from scipy.stats import norm
 from scipy.ndimage import gaussian_filter
 import matplotlib.pyplot as plt
-import straw
+import hicstraw
+# cwang
+## 20220316 
+### straw -> hicstraw
+#### new version has change the command of import the hicstraw from "import straw" to "import hicstraw"   
 import cooler
 import pandas as pd
 import statsmodels.stats.multitest as smm
@@ -656,9 +660,12 @@ def readHiCFile(f, chr, chr2, res, distance, norm_method):
     :return: Numpy matrix of contact counts
     """
     if not norm_method:
-        result = straw.straw('KR', f, str(chr), str(chr2), 'BP', res)
+        # cwang
+        # 20220316
+        # refer to new version usage of hic-straw , like:result = hicstraw.straw('observed', 'NONE', 'HIC001.hic', 'X', 'X', 'BP', 1000000)
+        result = hicstraw.straw('KR', f, str(chr), str(chr2), 'BP', res)
     else:
-        result = straw.straw(str(norm_method), f, str(chr), str(chr2), 'BP', res)
+        result = hicstraw.straw(str(norm_method), f, str(chr), str(chr2), 'BP', res)
     x = np.array(result[0]) // res
     y = np.array(result[1]) // res
     val = np.array(result[2])
@@ -856,14 +863,20 @@ def main():
                         f'{args.chromosome}\t{_x * res}\t{_x * res + res}\t{args.chromosome2}\t{_y * res}\t{_y * res + res}\t{q_val[i]}\t{changes_array[i]}\n')
         else:
             indices = np.argwhere(o < tsvout)
-            with open(args.outdir, 'w') as outfile:
+            with open(f"{args.outdir}.tsv", 'w') as outfile:
                 outfile.write('CHR1\tLOC1_start\tLOC1_end\tCHR2\tLOC2_start\tLOC2_end\tQ_VAL\tLOG_FOLD_CHANGE\n')
                 for i in indices:
                     _x, _y = i[0], i[1]
                     outfile.write(
                         f'{args.chromosome}\t{_x * res}\t{_x * res + res}\t{args.chromosome2}\t{_y * res}\t{_y * res + res}\t{o[_x,_y]}\t{changes_array[_x,_y]}\n')
+            np.save(f"{args.outdir}.npy", o)
+    # --tsvout Matrix is output with or without a tsv file
+    # cwang
+    ## 20220316
+    ## -o :the file prefix
+    ### outfile: {prefix}.npy; {prefix}.tsv
     else:
-        np.save(args.outdir, o)
+        np.save(f"{args.outdir}.npy", o)
 
 
 def sizeof_fmt(num, suffix='B'):
