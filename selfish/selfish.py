@@ -855,12 +855,13 @@ def main():
         if args.st:
         #indices = np.argwhere(o < tsvout)
         
-            with open(args.outdir, 'w') as outfile:
+            with open(f"{args.outdir}.tsv", 'w') as outfile:
                 outfile.write('CHR1\tLOC1_start\tLOC1_end\tCHR2\tLOC2_start\tLOC2_end\tQ_VAL\tLOG_FOLD_CHANGE\n')
                 for i in range(len(x)):
                     _x, _y = x[i], y[i]
                     outfile.write(
                         f'{args.chromosome}\t{_x * res}\t{_x * res + res}\t{args.chromosome2}\t{_y * res}\t{_y * res + res}\t{q_val[i]}\t{changes_array[i]}\n')
+            np.save(f"{args.outdir}.npy", o)
         else:
             indices = np.argwhere(o < tsvout)
             with open(f"{args.outdir}.tsv", 'w') as outfile:
